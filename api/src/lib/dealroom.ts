@@ -5,7 +5,7 @@ const BASE_URL = "https://api.dealroom.co/api/v1";
 const client = axios.create({
   baseURL: BASE_URL,
   headers: {
-    Authorization: `Bearer ${process.env.DEALROOM_API_KEY}`,
+    Authorization: `Bearer ${process.env.API_DEALROOM}`,
     "Content-Type": "application/json",
   },
 });
