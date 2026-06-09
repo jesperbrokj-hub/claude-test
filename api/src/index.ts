@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { searchFundingRounds } from "./routes/funding";
 import { getCompanyBrief } from "./routes/brief";
 import { syncClients, getKnownClients } from "./routes/clients";
-import { searchCompanies } from "./routes/companies";
+import { searchCompaniesRoute } from "./routes/companies";
 
 dotenv.config();
 
@@ -24,7 +24,7 @@ app.use("/api/funding", searchFundingRounds);
 app.use("/api/brief", getCompanyBrief);
 app.use("/api/clients", syncClients);
 app.use("/api/clients", getKnownClients);
-app.use("/api/companies", searchCompanies);
+app.use("/api/companies", searchCompaniesRoute);
 
 app.listen(PORT, () => {
   console.log(`GrowthDeal API running on port ${PORT}`);
