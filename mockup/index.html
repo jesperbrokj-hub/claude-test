@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GrowthDeal — Internal Deal Intelligence</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:       #0B1120;
+    --navy-2:     #111827;
+    --navy-3:     #1a2438;
+    --navy-4:     #243044;
+    --teal:       #00D4C8;
+    --teal-dim:   #00a89e;
+    --teal-muted: rgba(0,212,200,0.12);
+    --text:       #E8EDF5;
+    --text-2:     #8A96A8;
+    --text-3:     #5a6478;
+    --border:     rgba(255,255,255,0.07);
+    --green:      #22c55e;
+    --amber:      #f59e0b;
+    --blue:       #3b82f6;
+    --purple:     #8b5cf6;
+    --red:        #ef4444;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    font-size: 13px;
+  }
+
+  /* ── SIDEBAR ─────────────────────────────────────────── */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--navy-2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .logo {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--teal);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 15px; color: var(--navy);
+  }
+
+  .logo-text { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+  .logo-sub { font-size: 10px; color: var(--text-2); margin-top: 1px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+  nav { padding: 12px 10px; flex: 1; }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-3);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 10px 10px 6px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--text-2);
+    transition: all 0.15s;
+    margin-bottom: 1px;
+    font-size: 13px;
+  }
+
+  .nav-item:hover { background: var(--navy-3); color: var(--text); }
+  .nav-item.active { background: var(--teal-muted); color: var(--teal); }
+  .nav-item .icon { width: 16px; text-align: center; opacity: 0.8; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--teal);
+    color: var(--navy);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 99px;
+  }
+
+  .sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .user-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--navy-3);
+  }
+
+  .avatar {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--teal), var(--blue));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white;
+  }
+
+  .user-name { font-size: 12px; font-weight: 500; }
+  .user-role { font-size: 10px; color: var(--text-2); }
+
+  /* ── MAIN ─────────────────────────────────────────────── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+    background: var(--navy-2);
+  }
+
+  .page-title { font-size: 15px; font-weight: 600; }
+  .page-sub { font-size: 12px; color: var(--text-2); margin-left: 6px; }
+
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+  .btn {
+    padding: 6px 14px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-2);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--navy-3); color: var(--text); }
+
+  .btn-primary {
+    background: var(--teal);
+    color: var(--navy);
+  }
+  .btn-primary:hover { background: var(--teal-dim); }
+
+  .last-sync { font-size: 11px; color: var(--text-3); }
+
+  /* ── SEARCH BAR ───────────────────────────────────────── */
+  .search-bar {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--navy-2);
+  }
+
+  .search-wrap {
+    display: flex; gap: 10px; align-items: center;
+  }
+
+  .search-input-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  .search-icon {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--text-3); font-size: 14px;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--navy-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px 9px 36px;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    transition: border 0.15s;
+  }
+
+  .search-input::placeholder { color: var(--text-3); }
+  .search-input:focus { border-color: var(--teal); }
+
+  .filter-chips { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+
+  .chip {
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .chip-active { background: var(--teal-muted); color: var(--teal); border: 1px solid rgba(0,212,200,0.3); }
+  .chip-inactive { background: var(--navy-3); color: var(--text-2); border: 1px solid var(--border); }
+  .chip-inactive:hover { border-color: var(--teal); color: var(--text); }
+
+  /* ── TABLE AREA ───────────────────────────────────────── */
+  .table-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .table-header {
+    display: flex; align-items: center;
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: var(--navy);
+    z-index: 10;
+  }
+
+  .th {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .th:hover { color: var(--text-2); }
+  .th.sorted { color: var(--teal); }
+
+  .col-date    { width: 90px; }
+  .col-company { flex: 1; min-width: 180px; }
+  .col-stage   { width: 100px; }
+  .col-amount  { width: 100px; text-align: right; }
+  .col-sector  { width: 140px; }
+  .col-hq      { width: 110px; }
+  .col-investors { flex: 1; min-width: 160px; }
+  .col-status  { width: 130px; }
+  .col-score   { width: 70px; text-align: center; }
+  .col-action  { width: 40px; }
+
+  .table-row {
+    display: flex; align-items: center;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+    min-height: 52px;
+  }
+
+  .table-row:hover { background: var(--navy-3); }
+  .table-row.selected { background: rgba(0,212,200,0.06); border-left: 2px solid var(--teal); }
+
+  .td { font-size: 12px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 12px; }
+
+  .company-cell { display: flex; align-items: center; gap: 10px; }
+
+  .company-logo {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+    color: white;
+  }
+
+  .company-name { font-weight: 600; font-size: 13px; }
+  .company-tagline { font-size: 11px; color: var(--text-2); margin-top: 1px; }
+
+  .stage-badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  .stage-a { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .stage-b { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .stage-c { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .stage-growth { background: rgba(34,197,94,0.15); color: #4ade80; }
+
+  .amount { font-weight: 600; color: var(--text); font-size: 13px; text-align: right; }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .status-prospect { background: rgba(0,212,200,0.1); color: var(--teal); }
+  .status-client { background: rgba(34,197,94,0.1); color: var(--green); }
+
+  .status-dot { width: 5px; height: 5px; border-radius: 50%; }
+  .dot-teal { background: var(--teal); }
+  .dot-green { background: var(--green); }
+
+  .score-ring {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    margin: 0 auto;
+  }
+  .score-high { background: rgba(34,197,94,0.15); color: var(--green); }
+  .score-mid  { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .score-low  { background: rgba(239,68,68,0.1); color: var(--red); }
+
+  .chevron { color: var(--text-3); font-size: 14px; }
+
+  /* ── DRAWER ───────────────────────────────────────────── */
+  .drawer-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    display: none;
+  }
+  .drawer-overlay.open { display: block; }
+
+  .drawer {
+    position: fixed; top: 0; right: -520px;
+    width: 520px; height: 100vh;
+    background: var(--navy-2);
+    border-left: 1px solid var(--border);
+    z-index: 101;
+    transition: right 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .drawer.open { right: 0; }
+
+  .drawer-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+
+  .drawer-company { display: flex; align-items: center; gap: 12px; }
+
+  .drawer-logo {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800; color: white;
+  }
+
+  .drawer-company-name { font-size: 18px; font-weight: 700; }
+  .drawer-company-url { font-size: 12px; color: var(--teal); margin-top: 2px; }
+
+  .close-btn {
+    background: var(--navy-3);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-2); font-size: 16px;
+    transition: all 0.15s;
+  }
+  .close-btn:hover { color: var(--text); background: var(--navy-4); }
+
+  .drawer-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+  .brief-section { margin-bottom: 20px; }
+
+  .brief-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-3);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .brief-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .brief-text.highlight {
+    background: var(--teal-muted);
+    border-left: 2px solid var(--teal);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    color: var(--text);
+  }
+
+  .products-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .product-tag {
+    padding: 5px 10px;
+    background: var(--navy-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .product-tag.primary {
+    background: var(--teal-muted);
+    border-color: rgba(0,212,200,0.3);
+    color: var(--teal);
+  }
+
+  .action-box {
+    background: var(--navy-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .action-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .action-text { font-size: 12px; color: var(--text); line-height: 1.5; }
+  .action-text strong { color: var(--teal); }
+
+  .relevance-row {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--navy-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .relevance-score {
+    font-size: 28px; font-weight: 800; color: var(--green);
+    line-height: 1;
+  }
+
+  .relevance-bar-wrap { flex: 1; }
+  .relevance-label { font-size: 11px; color: var(--text-2); margin-bottom: 5px; }
+  .relevance-bar {
+    height: 5px; background: var(--navy-4); border-radius: 99px; overflow: hidden;
+  }
+  .relevance-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--teal), var(--green)); }
+
+  .metrics-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-top: 4px;
+  }
+
+  .metric-card {
+    background: var(--navy-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .metric-label { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .metric-value { font-size: 16px; font-weight: 700; color: var(--text); }
+  .metric-sub { font-size: 11px; color: var(--text-2); margin-top: 2px; }
+  .metric-trend { font-size: 11px; color: var(--green); }
+
+  .sparkline { width: 100%; height: 36px; margin-top: 6px; }
+
+  .drawer-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 8px;
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  /* ── SUMMARY STAT ROW ─────────────────────────────────── */
+  .stat-row {
+    display: flex; gap: 1px;
+    border-bottom: 1px solid var(--border);
+    background: var(--border);
+  }
+
+  .stat-card {
+    flex: 1;
+    background: var(--navy-2);
+    padding: 14px 20px;
+  }
+
+  .stat-label { font-size: 11px; color: var(--text-2); margin-bottom: 4px; }
+  .stat-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .stat-sub { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+  .stat-teal { color: var(--teal); }
+  .stat-green { color: var(--green); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--navy-4); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">
+      <div class="logo-icon">G</div>
+      <div>
+        <div class="logo-text">GrowthDeal</div>
+        <div class="logo-sub">Deal Intelligence</div>
+      </div>
+    </div>
+  </div>
+
+  <nav>
+    <div class="nav-label">Sourcing</div>
+    <div class="nav-item active" onclick="showTab('feed')">
+      <span class="icon">⚡</span> Deal Feed
+      <span class="nav-badge">7</span>
+    </div>
+    <div class="nav-item" onclick="showTab('search')">
+      <span class="icon">🔍</span> Search
+    </div>
+    <div class="nav-item">
+      <span class="icon">📋</span> Pipeline
+    </div>
+
+    <div class="nav-label">Intelligence</div>
+    <div class="nav-item">
+      <span class="icon">🏢</span> Companies
+    </div>
+    <div class="nav-item">
+      <span class="icon">💼</span> Investors
+    </div>
+    <div class="nav-item">
+      <span class="icon">🗺️</span> Ecosystem Map
+    </div>
+
+    <div class="nav-label">Settings</div>
+    <div class="nav-item">
+      <span class="icon">🔔</span> Alerts
+    </div>
+    <div class="nav-item">
+      <span class="icon">🔗</span> CRM Sync
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="avatar">JB</div>
+      <div>
+        <div class="user-name">Jesper Brok</div>
+        <div class="user-role">Growth Banking</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <span class="page-title">Deal Feed</span>
+      <span class="page-sub">Nordic Series A–Growth · Last 90 days</span>
+    </div>
+    <div class="topbar-right">
+      <span class="last-sync">↻ Synced 2 min ago</span>
+      <button class="btn btn-ghost">Export CSV</button>
+      <button class="btn btn-primary">+ Add to Pipeline</button>
+    </div>
+  </div>
+
+  <!-- STAT ROW -->
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-label">New rounds this week</div>
+      <div class="stat-value stat-teal">7</div>
+      <div class="stat-sub">↑ 3 vs last week</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">New prospects</div>
+      <div class="stat-value">5</div>
+      <div class="stat-sub">Not in CRM</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total raised (30d)</div>
+      <div class="stat-value">€184M</div>
+      <div class="stat-sub">Across 12 rounds</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">High relevance (≥8)</div>
+      <div class="stat-value stat-green">3</div>
+      <div class="stat-sub">Contact this week</div>
+    </div>
+  </div>
+
+  <!-- SEARCH + FILTERS -->
+  <div class="search-bar">
+    <div class="search-wrap">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" type="text" placeholder='Try: "B2B SaaS expanding to US" or "fintech with strong unit economics"' />
+      </div>
+      <button class="btn btn-primary" style="white-space:nowrap">AI Search</button>
+    </div>
+    <div class="filter-chips">
+      <span class="chip chip-active">All Stages</span>
+      <span class="chip chip-inactive">Series A</span>
+      <span class="chip chip-inactive">Series B</span>
+      <span class="chip chip-inactive">Series C+</span>
+      <span class="chip chip-active">🇩🇰 Denmark</span>
+      <span class="chip chip-active">🇸🇪 Sweden</span>
+      <span class="chip chip-active">🇳🇴 Norway</span>
+      <span class="chip chip-active">🇫🇮 Finland</span>
+      <span class="chip chip-inactive">New Prospects Only</span>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-area">
+    <div class="table-header">
+      <div class="th col-date sorted">Date ↓</div>
+      <div class="th col-company">Company</div>
+      <div class="th col-stage">Stage</div>
+      <div class="th col-amount" style="text-align:right">Amount</div>
+      <div class="th col-sector">Sector</div>
+      <div class="th col-hq">HQ</div>
+      <div class="th col-investors">Lead Investors</div>
+      <div class="th col-status">Status</div>
+      <div class="th col-score" style="text-align:center">Score</div>
+      <div class="th col-action"></div>
+    </div>
+
+    <!-- ROW 1 — selected -->
+    <div class="table-row selected" onclick="openDrawer()">
+      <div class="td col-date" style="color:var(--text-2)">Jun 4, 2026</div>
+      <div class="td col-company">
+        <div class="company-cell">
+          <div class="company-logo" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">N</div>
+          <div>
+            <div class="company-name">Nordsec</div>
+            <div class="company-tagline">Zero-trust security for Nordic enterprises</div>
+          </div>
+        </div>
+      </div>
+      <div class="td col-stage"><span class="stage-badge stage-b">SERIES B</span></div>
+      <div class="td col-amount"><span class="amount">€28M</span></div>
+      <div class="td col-sector" style="color:var(--text-2)">Cybersecurity</div>
+      <div class="td col-hq" style="color:var(--text-2)">🇸🇪 Stockholm</div>
+      <div class="td col-investors" style="color:var(--text-2)">EQT Ventures, Northzone</div>
+      <div class="td col-status"><span class="status-badge status-prospect"><span class="status-dot dot-teal"></span>New Prospect</span></div>
+      <div class="td col-score"><div class="score-ring score-high">9</div></div>
+      <div class="td col-action"><span class="chevron">›</span></div>
+    </div>
+
+    <!-- ROW 2 -->
+    <div class="table-row" onclick="openDrawer2()">
+      <div class="td col-date" style="color:var(--text-2)">Jun 3, 2026</div>
+      <div class="td col-company">
+        <div class="company-cell">
+          <div class="company-logo" style="background:linear-gradient(135deg,#0ea5e9,#06b6d4)">P</div>
+          <div>
+            <div class="company-name">Payr</div>
+            <div class="company-tagline">B2B payments infrastructure for SMEs</div>
+          </div>
+        </div>
+      </div>
+      <div class="td col-stage"><span class="stage-badge stage-a">SERIES A</span></div>
+      <div class="td col-amount"><span class="amount">€12M</span></div>
+      <div class="td col-sector" style="color:var(--text-2)">Fintech</div>
+      <div class="td col-hq" style="color:var(--text-2)">🇩🇰 Copenhagen</div>
+      <div class="td col-investors" style="color:var(--text-2)">Seed Capital, By Donation</div>
+      <div class="td col-status"><span class="status-badge status-client"><span class="status-dot dot-green"></span>Existing Client</span></div>
+      <div class="td col-score"><div class="score-ring score-mid">6</div></div>
+      <div class="td col-action"><span class="chevron">›</span></div>
+    </div>
+
+    <!-- ROW 3 -->
+    <div class="table-row" onclick="openDrawer()">
+      <div class="td col-date" style="color:var(--text-2)">Jun 2, 2026</div>
+      <div class="td col-company">
+        <div class="company-cell">
+          <div class="company-logo" style="background:linear-gradient(135deg,#10b981,#059669)">K</div>
+          <div>
+            <div class="company-name">Klimato</div>
+            <div class="company-tagline">Carbon footprint tracking for food companies</div>
+          </div>
+        </div>
+      </div>
+      <div class="td col-stage"><span class="stage-badge stage-a">SERIES A</span></div>
+      <div class="td col-amount"><span class="amount">€8.5M</span></div>
+      <div class="td col-sector" style="color:var(--text-2)">Climate Tech</div>
+      <div class="td col-hq" style="color:var(--text-2)">🇸🇪 Malmö</div>
+      <div class="td col-investors" style="color:var(--text-2)">Capnamic, IKEA GreenTech</div>
+      <div class="td col-status"><span class="status-badge status-prospect"><span class="status-dot dot-teal"></span>New Prospect</span></div>
+      <div class="td col-score"><div class="score-ring score-mid">7</div></div>
+      <div class="td col-action"><span class="chevron">›</span></div>
+    </div>
+
+    <!-- ROW 4 -->
+    <div class="table-row" onclick="openDrawer()">
+      <div class="td col-date" style="color:var(--text-2)">May 31, 2026</div>
+      <div class="td col-company">
+        <div class="company-cell">
+          <div class="company-logo" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">W</div>
+          <div>
+            <div class="company-name">Wisy</div>
+            <div class="company-tagline">AI-powered inventory management for retail</div>
+          </div>
+        </div>
+      </div>
+      <div class="td col-stage"><span class="stage-badge stage-b">SERIES B</span></div>
+      <div class="td col-amount"><span class="amount">€42M</span></div>
+      <div class="td col-sector" style="color:var(--text-2)">Retail Tech / AI</div>
+      <div class="td col-hq" style="color:var(--text-2)">🇫🇮 Helsinki</div>
+      <div class="td col-investors" style="color:var(--text-2)">Atomico, Finnvera</div>
+      <div class="td col-status"><span class="status-badge status-prospect"><span class="status-dot dot-teal"></span>New Prospect</span></div>
+      <div class="td col-score"><div class="score-ring score-high">8</div></div>
+      <div class="td col-action"><span class="chevron">›</span></div>
+    </div>
+
+    <!-- ROW 5 -->
+    <div class="table-row" onclick="openDrawer()">
+      <div class="td col-date" style="color:var(--text-2)">May 29, 2026</div>
+      <div class="td col-company">
+        <div class="company-cell">
+          <div class="company-logo" style="background:linear-gradient(135deg,#ec4899,#8b5cf6)">S</div>
+          <div>
+            <div class="company-name">Shopit</div>
+            <div class="company-tagline">Headless commerce platform for D2C brands</div>
+          </div>
+        </div>
+      </div>
+      <div class="td col-stage"><span class="stage-badge stage-c">SERIES C</span></div>
+      <div class="td col-amount"><span class="amount">€65M</span></div>
+      <div class="td col-sector" style="color:var(--text-2)">E-commerce</div>
+      <div class="td col-hq" style="color:var(--text-2)">🇩🇰 Aarhus</div>
+      <div class="td col-investors" style="color:var(--text-2)">Tiger Global, Balderton</div>
+      <div class="td col-status"><span class="status-badge status-prospect"><span class="status-dot dot-teal"></span>New Prospect</span></div>
+      <div class="td col-score"><div class="score-ring score-high">9</div></div>
+      <div class="td col-action"><span class="chevron">›</span></div>
+    </div>
+
+    <!-- ROW 6 -->
+    <div class="table-row" onclick="openDrawer()">
+      <div class="td col-date" style="color:var(--text-2)">May 27, 2026</div>
+      <div class="td col-company">
+        <div class="company-cell">
+          <div class="company-logo" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">T</div>
+          <div>
+            <div class="company-name">Trellis</div>
+            <div class="company-tagline">Workforce compliance SaaS for scaling teams</div>
+          </div>
+        </div>
+      </div>
+      <div class="td col-stage"><span class="stage-badge stage-a">SERIES A</span></div>
+      <div class="td col-amount"><span class="amount">Undisclosed</span></div>
+      <div class="td col-sector" style="color:var(--text-2)">HR Tech</div>
+      <div class="td col-hq" style="color:var(--text-2)">🇳🇴 Oslo</div>
+      <div class="td col-investors" style="color:var(--text-2)">Horisont Kapital</div>
+      <div class="td col-status"><span class="status-badge status-prospect"><span class="status-dot dot-teal"></span>New Prospect</span></div>
+      <div class="td col-score"><div class="score-ring score-low">4</div></div>
+      <div class="td col-action"><span class="chevron">›</span></div>
+    </div>
+
+    <!-- ROW 7 -->
+    <div class="table-row" onclick="openDrawer()">
+      <div class="td col-date" style="color:var(--text-2)">May 25, 2026</div>
+      <div class="td col-company">
+        <div class="company-cell">
+          <div class="company-logo" style="background:linear-gradient(135deg,#14b8a6,#0891b2)">A</div>
+          <div>
+            <div class="company-name">Aareon Nordic</div>
+            <div class="company-tagline">PropTech platform for housing associations</div>
+          </div>
+        </div>
+      </div>
+      <div class="td col-stage"><span class="stage-badge stage-growth">GROWTH</span></div>
+      <div class="td col-amount"><span class="amount">€110M</span></div>
+      <div class="td col-sector" style="color:var(--text-2)">PropTech</div>
+      <div class="td col-hq" style="color:var(--text-2)">🇩🇰 Copenhagen</div>
+      <div class="td col-investors" style="color:var(--text-2)">General Atlantic, ABN AMRO</div>
+      <div class="td col-status"><span class="status-badge status-client"><span class="status-dot dot-green"></span>Existing Client</span></div>
+      <div class="td col-score"><div class="score-ring score-mid">7</div></div>
+      <div class="td col-action"><span class="chevron">›</span></div>
+    </div>
+
+  </div><!-- /table-area -->
+</div><!-- /main -->
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+
+<!-- AI BRIEF DRAWER -->
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-company">
+      <div class="drawer-logo" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">N</div>
+      <div>
+        <div class="drawer-company-name">Nordsec</div>
+        <div class="drawer-company-url">nordsec.com · Stockholm, Sweden</div>
+      </div>
+    </div>
+    <div class="close-btn" onclick="closeDrawer()">✕</div>
+  </div>
+
+  <div class="drawer-body">
+
+    <!-- Relevance -->
+    <div class="brief-section">
+      <div class="relevance-row">
+        <div>
+          <div class="relevance-score">9</div>
+          <div style="font-size:10px;color:var(--text-2);margin-top:2px">/ 10</div>
+        </div>
+        <div class="relevance-bar-wrap">
+          <div class="relevance-label">Banking Relevance Score — Contact this week</div>
+          <div class="relevance-bar"><div class="relevance-fill" style="width:90%"></div></div>
+        </div>
+        <div>
+          <span class="status-badge status-prospect"><span class="status-dot dot-teal"></span>New Prospect</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="brief-section">
+      <div class="brief-label">Company Summary</div>
+      <div class="brief-text">Nordsec is a Stockholm-based zero-trust cybersecurity platform serving mid-market enterprises across the Nordics, with 320 employees and €28M Series B closed June 2026 led by EQT Ventures and Northzone. They operate a recurring SaaS model with 140% net revenue retention and active expansion into DACH markets.</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Why now -->
+    <div class="brief-section">
+      <div class="brief-label">Why Approach Now</div>
+      <div class="brief-text highlight">Fresh €28M Series B gives them 18–24 months of runway and a mandate to scale internationally — they will be setting up new legal entities, treasury operations, and multi-currency accounts in the next 60 days. Their current bank (Swedbank) has no growth banking product.</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Products -->
+    <div class="brief-section">
+      <div class="brief-label">Recommended Products</div>
+      <div class="products-wrap">
+        <span class="product-tag primary">FX Hedging</span>
+        <span class="product-tag primary">Business Account</span>
+        <span class="product-tag">Credit Facility</span>
+        <span class="product-tag">Treasury Management</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Metrics -->
+    <div class="brief-section">
+      <div class="brief-label">Growth Signals</div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Employees</div>
+          <div class="metric-value">320</div>
+          <div class="metric-trend">↑ 38% in 12 months</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Total Funding</div>
+          <div class="metric-value">€41M</div>
+          <div class="metric-sub">Seed → Series B</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Web Traffic</div>
+          <div class="metric-value">84K</div>
+          <div class="metric-trend">↑ 22% MoM</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Job Openings</div>
+          <div class="metric-value">47</div>
+          <div class="metric-sub">Sales & Engineering</div>
+        </div>
+      </div>
+
+      <!-- Mini sparkline SVG -->
+      <svg class="sparkline" viewBox="0 0 460 36" preserveAspectRatio="none" style="margin-top:12px">
+        <defs>
+          <linearGradient id="sg" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:rgba(0,212,200,0.3)"/>
+            <stop offset="100%" style="stop-color:rgba(0,212,200,0)"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,30 L60,26 L120,22 L180,18 L240,16 L300,12 L360,8 L420,5 L460,3 L460,36 L0,36 Z" fill="url(#sg)" />
+        <path d="M0,30 L60,26 L120,22 L180,18 L240,16 L300,12 L360,8 L420,5 L460,3" fill="none" stroke="var(--teal)" stroke-width="1.5"/>
+        <circle cx="460" cy="3" r="3" fill="var(--teal)"/>
+      </svg>
+      <div style="font-size:10px;color:var(--text-3);margin-top:2px">Headcount growth — 24 months</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Action -->
+    <div class="brief-section">
+      <div class="brief-label">Recommended Action</div>
+      <div class="action-box">
+        <div class="action-icon">🎯</div>
+        <div class="action-text">
+          <strong>Request warm intro via EQT Ventures (Martin Mignot)</strong> — they have an existing portfolio banking relationship with us. Reach out to CFO Sofia Lindgren directly on LinkedIn. Lead with FX hedging for their DACH expansion as the conversation opener.
+        </div>
+      </div>
+    </div>
+
+    <!-- Investors -->
+    <div class="brief-section">
+      <div class="brief-label">Key Investors</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="product-tag">EQT Ventures</span>
+        <span class="product-tag">Northzone</span>
+        <span class="product-tag">Inventure</span>
+      </div>
+    </div>
+
+  </div><!-- /drawer-body -->
+
+  <div class="drawer-footer">
+    <button class="btn btn-primary" style="flex:1">+ Add to Pipeline</button>
+    <button class="btn btn-ghost">Mark Not Relevant</button>
+    <button class="btn btn-ghost">↗ Open in Dealroom</button>
+  </div>
+</div>
+
+<script>
+  function openDrawer() {
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+  }
+  function openDrawer2() {
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+  }
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+  }
+  function showTab(tab) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    event.target.closest('.nav-item').classList.add('active');
+  }
+  // auto-open drawer on load to show it off
+  setTimeout(openDrawer, 400);
+</script>
+</body>
+</html>
