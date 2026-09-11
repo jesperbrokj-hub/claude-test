@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Markedsandel-dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Markedsandel-dashboard</h1>
+    <p class="subtitle">
+      Markedsandel (%) = Nye bankkunder onboardet med CVR-nummer &lt; 1 måned gammel /
+      Nye CVR-numre stiftet i samme periode.
+      Nævneren hentes automatisk fra Danmarks Statistiks StatBank (<span class="formula">api.statbank.dk</span>);
+      tælleren indtastes manuelt nedenfor.
+    </p>
+
+    <div class="panel">
+      <div class="controls">
+        <label for="months">Vis</label>
+        <select id="months">
+          <option value="6">Seneste 6 måneder</option>
+          <option value="12" selected>Seneste 12 måneder</option>
+          <option value="24">Seneste 24 måneder</option>
+          <option value="36">Seneste 36 måneder</option>
+        </select>
+        <button id="refresh">Opdater</button>
+        <span class="status" id="status"></span>
+      </div>
+
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+      <p class="legend-note">
+        Massiv linje/prik = faktisk tal (KONKEUM). Stiplet/hul prik = estimat for 2026+ (skaleret via NYRVI2-indekset).
+      </p>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Måned</th>
+            <th class="num">Nye CVR-numre</th>
+            <th>Kilde</th>
+            <th class="num">Nye bankkunder</th>
+            <th class="num">Markedsandel</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
