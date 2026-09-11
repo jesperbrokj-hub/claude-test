@@ -51,6 +51,16 @@ async function saveOnboarding(month, onboarded, inputEl) {
   }
 }
 
+async function clearOnboarding(month) {
+  try {
+    const res = await fetch(`/api/onboarding/${month}`, { method: "DELETE" });
+    if (!res.ok) throw new Error(`Kunne ikke slette (${res.status})`);
+    await load();
+  } catch (err) {
+    statusEl.textContent = err.message;
+  }
+}
+
 function renderTable(rows) {
   tableBody.innerHTML = "";
   for (const row of rows) {
@@ -74,6 +84,9 @@ function renderTable(rows) {
 
     const onboardTd = document.createElement("td");
     onboardTd.className = "num";
+    const onboardCell = document.createElement("div");
+    onboardCell.className = "onboard-cell";
+
     const input = document.createElement("input");
     input.type = "number";
     input.min = "0";
@@ -86,7 +99,18 @@ function renderTable(rows) {
       if (!Number.isInteger(value) || value < 0) return;
       saveOnboarding(row.month, value, input);
     });
-    onboardTd.appendChild(input);
+    onboardCell.appendChild(input);
+
+    const clearBtn = document.createElement("button");
+    clearBtn.type = "button";
+    clearBtn.className = "clear-btn";
+    clearBtn.title = "Ryd tal for denne måned";
+    clearBtn.textContent = "×";
+    clearBtn.hidden = row.onboarded === null;
+    clearBtn.addEventListener("click", () => clearOnboarding(row.month));
+    onboardCell.appendChild(clearBtn);
+
+    onboardTd.appendChild(onboardCell);
     tr.appendChild(onboardTd);
 
     const shareTd = document.createElement("td");

@@ -18,6 +18,12 @@ export interface NewCvrResult {
  * > LAST_ACTUAL_MONTH: estimated by scaling the same month last year's
  *   actual count with the NYRVI2 index's year-over-year ratio:
  *     estimate = actual(month - 12) × [index(month) / index(month - 12)]
+ *
+ * Known limitation (accepted as a stopgap, see README): this only looks
+ * up a real KONKEUM value 12 months back, so it resolves for 2026 (base
+ * year 2025 is actual) but not for 2027+, where the base year would
+ * itself be an estimate. Revisit once exact Datafordeler access lands or
+ * DST resumes raw counts.
  */
 export async function getNewCvrForMonth(month: MonthKey): Promise<NewCvrResult> {
   if (month <= LAST_ACTUAL_MONTH) {

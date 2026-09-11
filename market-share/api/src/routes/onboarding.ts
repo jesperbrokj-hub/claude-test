@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { setOnboarding } from "../lib/store";
+import { deleteOnboarding, setOnboarding } from "../lib/store";
 
 export const onboardingRouter = Router();
 
@@ -18,4 +18,16 @@ onboardingRouter.post("/", (req, res) => {
 
   setOnboarding(month, onboarded);
   res.json({ month, onboarded });
+});
+
+// DELETE /api/onboarding/2026-05  — clear a month's manually entered number
+onboardingRouter.delete("/:month", (req, res) => {
+  const { month } = req.params;
+
+  if (!MONTH_RE.test(month)) {
+    return res.status(400).json({ error: "month must be formatted YYYY-MM" });
+  }
+
+  deleteOnboarding(month);
+  res.json({ month, onboarded: null });
 });

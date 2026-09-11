@@ -34,3 +34,9 @@ export function setOnboarding(month: MonthKey, value: number): void {
   data[month] = value;
   writeAll(data);
 }
+
+export function deleteOnboarding(month: MonthKey): void {
+  const data = readAll();
+  delete data[month];
+  writeAll(data);
+}

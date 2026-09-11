@@ -26,6 +26,13 @@ Markedsandel (%) = Nye bankkunder onboardet med CVR-nummer < 1 måned gammel
 Dashboardet markerer tydeligt hvilke måneder der er **Faktisk** og hvilke
 der er **Estimat** (badge i tabellen, stiplet linje i grafen).
 
+**Kendt begrænsning:** estimatet kræver et faktisk KONKEUM-tal fra samme
+måned året før, så det virker for hele 2026 (basisår 2025 er faktisk) —
+men ikke for 2027+, hvor basisåret selv ville være et estimat. Det er en
+bevidst afgrænsning for nu (dashboardet er en midlertidig løsning indtil
+Datafordeler-sporet evt. genoptages, jf. det oprindelige brief), ikke en
+fejl.
+
 Se det oprindelige brief for baggrund, kildevalidering og det parkerede
 Datafordeler-spor: [Google Doc](https://docs.google.com/document/d/12C7snxQUwKCo4-ELJw5MCBxn2Rq_H8K4_6qmQEoVpAA/edit).
 
@@ -77,7 +84,12 @@ men ikke bekræftet mod en live respons.
 
 ## Deploy
 
-Følger samme mønster som `api/` (GrowthDeal) i denne repo — fx Railway.
-Der er ikke sat CI/CD op for `market-share/` endnu; tilføj en workflow
-som `.github/workflows/deploy.yml` scoped til `market-share/**` hvis I
-vil have automatisk deploy.
+Dashboardet er bevidst kun sat op til lokal brug: manuelle
+onboarding-tal gemmes i en flad JSON-fil på disken
+(`api/data/onboarding.json`), hvilket kun er robust, når appen kører på
+en maskine I selv kontrollerer (fx en kontor-PC eller intern server) —
+ikke på ephemeral hosting som Railways standard-filsystem, hvor en
+redeploy kan slette filen. Hvis I senere vil deploye det et sted med
+et flygtigt filsystem, skal onboarding-lageret flyttes til en rigtig
+database (fx Supabase, som allerede er sat op til GrowthDeal-projektet
+i denne repo) først.
