@@ -129,7 +129,7 @@ function renderChart(rows) {
   const sources = rows.map((r) => r.source);
 
   const pointColors = sources.map((s) =>
-    s === "estimate" ? "#b45309" : s === "actual" ? "#2563eb" : "#9ca3af"
+    s === "estimate" ? "#a9781e" : s === "actual" ? "#0f2a4c" : "#9aa3ab"
   );
 
   const config = {
@@ -140,8 +140,8 @@ function renderChart(rows) {
         {
           label: "Markedsandel %",
           data: values,
-          borderColor: "#2563eb",
-          backgroundColor: "rgba(37, 99, 235, 0.08)",
+          borderColor: "#0f2a4c",
+          backgroundColor: "rgba(15, 42, 76, 0.08)",
           spanGaps: true,
           tension: 0.25,
           pointRadius: 4,

@@ -4,19 +4,27 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Markedsandel-dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Markedsandel-dashboard</h1>
-    <p class="subtitle">
-      Markedsandel (%) = Nye bankkunder onboardet med CVR-nummer &lt; 1 måned gammel /
-      Nye CVR-numre stiftet i samme periode.
-      Nævneren hentes automatisk fra Danmarks Statistiks StatBank (<span class="formula">api.statbank.dk</span>);
-      tælleren indtastes manuelt nedenfor.
-    </p>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <p class="eyebrow">Danske Bank · Internt værktøj</p>
+      <h1>Markedsandel-dashboard</h1>
+      <p class="subtitle">
+        Markedsandel (%) = Nye bankkunder onboardet med CVR-nummer &lt; 1 måned gammel /
+        Nye CVR-numre stiftet i samme periode.
+        Nævneren hentes automatisk fra Danmarks Statistiks StatBank (<span class="formula">api.statbank.dk</span>);
+        tælleren indtastes manuelt nedenfor.
+      </p>
+    </div>
+  </header>
 
+  <main class="wrap">
     <div class="panel">
       <div class="controls">
         <label for="months">Vis</label>
@@ -34,7 +42,8 @@
         <canvas id="chart"></canvas>
       </div>
       <p class="legend-note">
-        Massiv linje/prik = faktisk tal (KONKEUM). Stiplet/hul prik = estimat for 2026+ (skaleret via NYRVI2-indekset).
+        <span class="legend-dot legend-dot--actual"></span>Massiv linje/prik = faktisk tal (KONKEUM).
+        <span class="legend-dot legend-dot--estimate"></span>Stiplet/hul prik = estimat for 2026+ (skaleret via NYRVI2-indekset).
       </p>
     </div>
 
@@ -52,7 +61,7 @@
         <tbody id="table-body"></tbody>
       </table>
     </div>
-  </div>
+  </main>
 
   <script src="app.js"></script>
 </body>
