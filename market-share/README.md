@@ -40,13 +40,16 @@ Datafordeler-spor: [Google Doc](https://docs.google.com/document/d/12C7snxQUwKCo
 
 ```
 market-share/
-  api/    Express/TypeScript-server: StatBank-klient, estimatlogik,
-          manuel onboarding-lager (data/onboarding.json), REST-API.
-  web/    Statisk frontend (vanilla HTML/JS + Chart.js): tabel og graf.
+  api/
+    src/    Express/TypeScript-server: StatBank-klient, estimatlogik,
+            manuel onboarding-lager (data/onboarding.json), REST-API.
+    web/    Statisk frontend (vanilla HTML/JS + Chart.js): tabel og graf.
 ```
 
 `api/src/index.ts` server også `web/` statisk, så hele dashboardet kører
-fra én proces.
+fra én proces. `web/` ligger bevidst *inde i* `api/` (ikke ved siden af)
+— platforme som Railway, hvor man peger en "Root Directory" på `api/`,
+deployer kun det der ligger inden i den mappe.
 
 ## Kør lokalt
 
