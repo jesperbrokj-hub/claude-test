@@ -19,7 +19,8 @@ onboardingRouter.post("/", async (req, res) => {
   try {
     await setOnboarding(month, onboarded);
     res.json({ month, onboarded });
-  } catch {
+  } catch (err) {
+    console.error("POST /api/onboarding failed:", err);
     res.status(502).json({ error: "Kunne ikke gemme lige nu" });
   }
 });
@@ -35,7 +36,8 @@ onboardingRouter.delete("/:month", async (req, res) => {
   try {
     await deleteOnboarding(month);
     res.json({ month, onboarded: null });
-  } catch {
+  } catch (err) {
+    console.error("DELETE /api/onboarding failed:", err);
     res.status(502).json({ error: "Kunne ikke slette lige nu" });
   }
 });
