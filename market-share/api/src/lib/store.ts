@@ -1,42 +1,32 @@
-import fs from "fs";
-import path from "path";
+import { createClient } from "@supabase/supabase-js";
 import { MonthKey } from "./months";
 
-const DATA_FILE = path.join(__dirname, "..", "..", "data", "onboarding.json");
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+const TABLE = "market_share_onboarding";
 
 type OnboardingData = Record<MonthKey, number>;
 
-function readAll(): OnboardingData {
-  try {
-    const raw = fs.readFileSync(DATA_FILE, "utf-8");
-    return JSON.parse(raw) as OnboardingData;
-  } catch {
-    return {};
+export async function getOnboarding(month: MonthKey): Promise<number | null> {
+  const { data } = await supabase.from(TABLE).select("onboarded").eq("month", month).maybeSingle();
+  return data?.onboarded ?? null;
+}
+
+export async function getAllOnboarding(): Promise<OnboardingData> {
+  const { data } = await supabase.from(TABLE).select("month, onboarded");
+  const result: OnboardingData = {};
+  for (const row of data ?? []) {
+    result[row.month] = row.onboarded;
   }
+  return result;
 }
 
-function writeAll(data: OnboardingData): void {
-  fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2) + "\n", "utf-8");
+export async function setOnboarding(month: MonthKey, value: number): Promise<void> {
+  const { error } = await supabase.from(TABLE).upsert({ month, onboarded: value }, { onConflict: "month" });
+  if (error) throw new Error(error.message);
 }
 
-export function getOnboarding(month: MonthKey): number | null {
-  const data = readAll();
-  return data[month] ?? null;
-}
-
-export function getAllOnboarding(): OnboardingData {
-  return readAll();
-}
-
-export function setOnboarding(month: MonthKey, value: number): void {
-  const data = readAll();
-  data[month] = value;
-  writeAll(data);
-}
-
-export function deleteOnboarding(month: MonthKey): void {
-  const data = readAll();
-  delete data[month];
-  writeAll(data);
+export async function deleteOnboarding(month: MonthKey): Promise<void> {
+  const { error } = await supabase.from(TABLE).delete().eq("month", month);
+  if (error) throw new Error(error.message);
 }

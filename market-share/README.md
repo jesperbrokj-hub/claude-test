@@ -40,9 +40,10 @@ Datafordeler-spor: [Google Doc](https://docs.google.com/document/d/12C7snxQUwKCo
 
 ```
 market-share/
+  supabase-schema.sql   Tabellen til det manuelle onboarding-lager.
   api/
     src/    Express/TypeScript-server: StatBank-klient, estimatlogik,
-            manuel onboarding-lager (data/onboarding.json), REST-API.
+            manuel onboarding-lager (Supabase), REST-API.
     web/    Statisk frontend (vanilla HTML/JS + Chart.js): tabel og graf.
 ```
 
@@ -56,7 +57,7 @@ deployer kun det der ligger inden i den mappe.
 ```bash
 cd market-share/api
 npm install
-cp .env.example .env   # valgfrit, default port er 3002
+cp .env.example .env   # udfyld SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (se "Onboarding-lager" nedenfor)
 npm run dev
 ```
 
@@ -69,8 +70,7 @@ npm run dev
   hver måned: `newCvr`, `source` (`actual` / `estimate` / `unavailable`),
   `onboarded`, `marketSharePct`.
 - `POST /api/onboarding` — `{ "month": "2026-05", "onboarded": 320 }`,
-  gemmer det manuelle onboarding-tal for måneden i
-  `api/data/onboarding.json`.
+  gemmer det manuelle onboarding-tal for måneden i Supabase.
 - `GET /api/news?limit=8` — nyhedsartikler om nye CVR-numre/nystiftede
   virksomheder, via Google News' offentlige RSS-søgning (ingen API-nøgle
   krævet). Bedste-forsøg søgning, ikke en kurateret eller garanteret
@@ -94,14 +94,29 @@ med normal internetadgang (som hos dig lokalt), bør du tjekke:
   format, men søgeordene (`nye CVR-numre`, `nystiftede virksomheder`
   osv.) er ikke afprøvet mod rigtige resultater endnu.
 
+## Onboarding-lager (Supabase)
+
+De manuelle onboarding-tal gemmes i Supabase i stedet for en lokal fil
+— nødvendigt for at de overlever en redeploy på Railway (eller enhver
+anden hosting med et flygtigt filsystem).
+
+1. Opret en tabel: kør SQL'en i [`supabase-schema.sql`](./supabase-schema.sql)
+   i dit Supabase-projekts SQL editor. Det kan enten være et nyt
+   Supabase-projekt eller samme projekt som GrowthDeal bruger i denne
+   repo — det er bare en ny, urelateret tabel.
+2. Under Supabase-projektets **Settings → API**, find **Project URL** og
+   **service_role key** (ikke `anon`-nøglen — service_role har skriverettigheder).
+3. Sæt dem som miljøvariabler:
+   - Lokalt: i `api/.env` (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`)
+   - På Railway: Settings → Variables på servicen
+
+Uden disse variabler starter serveren stadig (health-check virker),
+men `/api/market-share` viser ingen onboarding-tal, og
+`/api/onboarding` fejler med en tydelig fejlmeddelelse i stedet for at
+crashe.
+
 ## Deploy
 
-Dashboardet er bevidst kun sat op til lokal brug: manuelle
-onboarding-tal gemmes i en flad JSON-fil på disken
-(`api/data/onboarding.json`), hvilket kun er robust, når appen kører på
-en maskine I selv kontrollerer (fx en kontor-PC eller intern server) —
-ikke på ephemeral hosting som Railways standard-filsystem, hvor en
-redeploy kan slette filen. Hvis I senere vil deploye det et sted med
-et flygtigt filsystem, skal onboarding-lageret flyttes til en rigtig
-database (fx Supabase, som allerede er sat op til GrowthDeal-projektet
-i denne repo) først.
+Deployet til Railway (Root Directory: `market-share/api`, branch:
+`claude/friendly-ptolemy-eiahec`) — se ovenstående Supabase-opsætning
+først, ellers mister redeploys alle indtastede tal.

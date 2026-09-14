@@ -6,7 +6,7 @@ export const onboardingRouter = Router();
 const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 // POST /api/onboarding  { "month": "2026-05", "onboarded": 320 }
-onboardingRouter.post("/", (req, res) => {
+onboardingRouter.post("/", async (req, res) => {
   const { month, onboarded } = req.body ?? {};
 
   if (typeof month !== "string" || !MONTH_RE.test(month)) {
@@ -16,18 +16,26 @@ onboardingRouter.post("/", (req, res) => {
     return res.status(400).json({ error: "onboarded must be a non-negative integer" });
   }
 
-  setOnboarding(month, onboarded);
-  res.json({ month, onboarded });
+  try {
+    await setOnboarding(month, onboarded);
+    res.json({ month, onboarded });
+  } catch {
+    res.status(502).json({ error: "Kunne ikke gemme lige nu" });
+  }
 });
 
 // DELETE /api/onboarding/2026-05  — clear a month's manually entered number
-onboardingRouter.delete("/:month", (req, res) => {
+onboardingRouter.delete("/:month", async (req, res) => {
   const { month } = req.params;
 
   if (!MONTH_RE.test(month)) {
     return res.status(400).json({ error: "month must be formatted YYYY-MM" });
   }
 
-  deleteOnboarding(month);
-  res.json({ month, onboarded: null });
+  try {
+    await deleteOnboarding(month);
+    res.json({ month, onboarded: null });
+  } catch {
+    res.status(502).json({ error: "Kunne ikke slette lige nu" });
+  }
 });

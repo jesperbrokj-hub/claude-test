@@ -33,7 +33,7 @@ marketShareRouter.get("/", async (req, res) => {
   const from = typeof req.query.from === "string" ? req.query.from : shiftMonth(to, -(monthsBack - 1));
 
   const months = monthRange(from, to);
-  const onboarding = getAllOnboarding();
+  const onboarding = await getAllOnboarding();
 
   const results: MonthData[] = await Promise.all(
     months.map(async (month): Promise<MonthData> => {
