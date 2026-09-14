@@ -18,15 +18,21 @@ export interface NewsArticle {
 //
 // hl=da&gl=DK alone isn't a hard filter — it let through Norwegian outlets
 // (Bergens Tidende, Statistisk sentralbyrå) and years-old unrelated hits.
-// `site:.dk` restricts to Danish-domain sources, quoted phrases avoid
-// loose single-word matches, and `when:365d` keeps results recent.
+// `site:.dk` restricts to Danish-domain sources. Stacking that with exact
+// phrase quotes *and* when:365d on every query turned out to be too much
+// at once — combined, they matched nothing live. Keeping site:.dk (does
+// the language/country job on its own) and dropping the rest; results
+// are already sorted newest-first, so recency still wins without a hard
+// cutoff that can zero out a quiet news week.
 const QUERIES = [
-  '"nyregistrerede virksomheder" site:.dk when:365d',
-  '"nystiftede virksomheder" site:.dk when:365d',
-  '"nye CVR-numre" site:.dk when:365d',
-  '"Dansk Erhverv" "nye virksomheder" site:.dk when:365d',
-  'EIFO iværksættere site:.dk when:365d',
-  '"nye virksomheder" "Danmarks Statistik" site:.dk when:365d',
+  "nyregistrerede virksomheder site:.dk",
+  "nystiftede virksomheder site:.dk",
+  "nye CVR-numre site:.dk",
+  '"Dansk Erhverv" nye virksomheder site:.dk',
+  "EIFO iværksættere site:.dk",
+  "antal nye virksomheder statistik Danmark site:.dk",
+  "stiftelse af virksomheder Danmark site:.dk",
+  "konkurser nystiftede virksomheder Danmark site:.dk",
 ];
 
 function decodeXmlEntities(raw: string): string {
