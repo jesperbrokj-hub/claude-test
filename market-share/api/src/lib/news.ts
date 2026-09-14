@@ -15,13 +15,18 @@ export interface NewsArticle {
 // (rather than one compound OR string, which tended to return zero hits)
 // cover how different outlets and DST itself phrase this topic, including
 // the organisations that get quoted on it (per the original brief).
+//
+// hl=da&gl=DK alone isn't a hard filter — it let through Norwegian outlets
+// (Bergens Tidende, Statistisk sentralbyrå) and years-old unrelated hits.
+// `site:.dk` restricts to Danish-domain sources, quoted phrases avoid
+// loose single-word matches, and `when:365d` keeps results recent.
 const QUERIES = [
-  "nyregistrerede virksomheder Danmark",
-  "nystiftede virksomheder Danmark",
-  "nye CVR-numre statistik",
-  "Dansk Erhverv nye virksomheder",
-  "EIFO iværksættere statistik",
-  "nye virksomheder Danmarks Statistik",
+  '"nyregistrerede virksomheder" site:.dk when:365d',
+  '"nystiftede virksomheder" site:.dk when:365d',
+  '"nye CVR-numre" site:.dk when:365d',
+  '"Dansk Erhverv" "nye virksomheder" site:.dk when:365d',
+  'EIFO iværksættere site:.dk when:365d',
+  '"nye virksomheder" "Danmarks Statistik" site:.dk when:365d',
 ];
 
 function decodeXmlEntities(raw: string): string {
