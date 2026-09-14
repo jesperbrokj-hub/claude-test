@@ -11,8 +11,18 @@ export interface NewsArticle {
 }
 
 // Best-effort keyword search, not a curated feed — Google News RSS needs no
-// API key/signup, unlike most dedicated news APIs.
-const QUERY = "nye CVR-numre OR nystiftede virksomheder OR nye virksomheder Danmark";
+// API key/signup, unlike most dedicated news APIs. Multiple narrower queries
+// (rather than one compound OR string, which tended to return zero hits)
+// cover how different outlets and DST itself phrase this topic, including
+// the organisations that get quoted on it (per the original brief).
+const QUERIES = [
+  "nyregistrerede virksomheder Danmark",
+  "nystiftede virksomheder Danmark",
+  "nye CVR-numre statistik",
+  "Dansk Erhverv nye virksomheder",
+  "EIFO iværksættere statistik",
+  "nye virksomheder Danmarks Statistik",
+];
 
 function decodeXmlEntities(raw: string): string {
   return raw
@@ -48,14 +58,40 @@ function parseRss(xml: string): NewsArticle[] {
   });
 }
 
-async function fetchAllArticles(): Promise<NewsArticle[]> {
-  const url = `https://news.google.com/rss/search?q=${encodeURIComponent(QUERY)}&hl=da&gl=DK&ceid=DK:da`;
+async function fetchQuery(query: string): Promise<NewsArticle[]> {
+  const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=da&gl=DK&ceid=DK:da`;
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`News request failed (${res.status})`);
   }
   const xml = await res.text();
-  return parseRss(xml);
+  return parseRss(xml).slice(0, 10);
+}
+
+function dedupe(articles: NewsArticle[]): NewsArticle[] {
+  const seen = new Set<string>();
+  const result: NewsArticle[] = [];
+  for (const article of articles) {
+    const key = article.link || article.title;
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    result.push(article);
+  }
+  return result;
+}
+
+function byNewestFirst(a: NewsArticle, b: NewsArticle): number {
+  const aTime = a.publishedAt ? Date.parse(a.publishedAt) : 0;
+  const bTime = b.publishedAt ? Date.parse(b.publishedAt) : 0;
+  return bTime - aTime;
+}
+
+async function fetchAllArticles(): Promise<NewsArticle[]> {
+  // allSettled so one failing query (or an empty result set) doesn't wipe
+  // out results from the others.
+  const results = await Promise.allSettled(QUERIES.map(fetchQuery));
+  const articles = results.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+  return dedupe(articles).sort(byNewestFirst);
 }
 
 export async function fetchNews(limit = 8): Promise<NewsArticle[]> {

@@ -395,6 +395,36 @@ input.onboard-input.saved {
   margin: 0 0 14px;
 }
 
+.official-sources {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  background: var(--sand);
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.official-sources-label {
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.official-sources a {
+  color: var(--navy);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.official-sources a:hover {
+  text-decoration: underline;
+}
+
 .news-list {
   list-style: none;
   margin: 0;
