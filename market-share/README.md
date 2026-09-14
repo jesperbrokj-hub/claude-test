@@ -68,19 +68,28 @@ npm run dev
 - `POST /api/onboarding` — `{ "month": "2026-05", "onboarded": 320 }`,
   gemmer det manuelle onboarding-tal for måneden i
   `api/data/onboarding.json`.
+- `GET /api/news?limit=8` — nyhedsartikler om nye CVR-numre/nystiftede
+  virksomheder, via Google News' offentlige RSS-søgning (ingen API-nøgle
+  krævet). Bedste-forsøg søgning, ikke en kurateret eller garanteret
+  komplet liste — se `api/src/lib/news.ts`.
 
 ## Kendt begrænsning i denne udviklingssession
 
-Denne build-container kan ikke nå `api.statbank.dk` — organisationens
-udgående netværkspolitik blokerer værten (403 på CONNECT). Backend-koden
-følger StatBank's dokumenterede kald og CSV-format nøje, og
-serverlogik/validering/persistens er testet lokalt end-to-end, men selve
-StatBank-hentningen er **ikke** blevet verificeret mod et rigtigt svar. Når
-appen kører et sted med normal internetadgang (fx efter deploy), bør du
-tjekke et par måneder i tabellen mod kendte tal — særligt
-CSV-talformatet (`api/src/lib/statbank.ts` → `parseStatbankNumber`), som
-er skrevet defensivt til at håndtere både dansk og engelsk talformatering,
-men ikke bekræftet mod en live respons.
+Denne build-container kan ikke nå `api.statbank.dk` eller
+`news.google.com` — organisationens udgående netværkspolitik blokerer
+begge (403 på CONNECT). Backend-koden følger begge kilders dokumenterede
+format nøje, og serverlogik/validering/persistens/graceful-fejlhåndtering
+er testet lokalt end-to-end, men selve hentningen er **ikke** blevet
+verificeret mod et rigtigt svar for nogen af dem. Når appen kører et sted
+med normal internetadgang (som hos dig lokalt), bør du tjekke:
+- et par måneder i tabellen mod kendte StatBank-tal — særligt
+  CSV-talformatet (`api/src/lib/statbank.ts` → `parseStatbankNumber`),
+  som er skrevet defensivt til at håndtere både dansk og engelsk
+  talformatering, men ikke bekræftet mod en live respons.
+- at nyhedslisten (`api/src/lib/news.ts`) rent faktisk viser relevante
+  artikler — RSS-parsingen er skrevet efter Google News' dokumenterede
+  format, men søgeordene (`nye CVR-numre`, `nystiftede virksomheder`
+  osv.) er ikke afprøvet mod rigtige resultater endnu.
 
 ## Deploy
 

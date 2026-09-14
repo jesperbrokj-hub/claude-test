@@ -8,6 +8,8 @@ const monthsSelect = document.getElementById("months");
 const refreshBtn = document.getElementById("refresh");
 const statusEl = document.getElementById("status");
 const tableBody = document.getElementById("table-body");
+const newsList = document.getElementById("news-list");
+const newsStatusEl = document.getElementById("news-status");
 
 let chart = null;
 
@@ -225,6 +227,61 @@ function renderChart(rows) {
   }
 }
 
+function formatNewsDate(pubDate) {
+  if (!pubDate) return "";
+  const d = new Date(pubDate);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("da-DK", { day: "numeric", month: "short", year: "numeric" });
+}
+
+async function fetchNews(limit) {
+  const res = await fetch(`/api/news?limit=${limit}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || `API-fejl (${res.status})`);
+  return data.articles;
+}
+
+function renderNews(articles) {
+  newsList.innerHTML = "";
+  if (articles.length === 0) {
+    const empty = document.createElement("li");
+    empty.className = "news-empty";
+    empty.textContent = "Ingen artikler fundet lige nu.";
+    newsList.appendChild(empty);
+    return;
+  }
+  for (const article of articles) {
+    const li = document.createElement("li");
+    li.className = "news-item";
+
+    const link = document.createElement("a");
+    link.href = article.link;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = article.title;
+    li.appendChild(link);
+
+    const meta = document.createElement("span");
+    meta.className = "news-meta";
+    const parts = [article.source, formatNewsDate(article.publishedAt)].filter(Boolean);
+    meta.textContent = parts.join(" · ");
+    li.appendChild(meta);
+
+    newsList.appendChild(li);
+  }
+}
+
+async function loadNews() {
+  newsStatusEl.textContent = "Henter nyheder…";
+  try {
+    const articles = await fetchNews(8);
+    renderNews(articles);
+    newsStatusEl.textContent = "";
+  } catch (err) {
+    newsStatusEl.textContent = err.message;
+  }
+}
+
 async function load() {
   statusEl.textContent = "Henter data…";
   try {
@@ -241,3 +298,4 @@ refreshBtn.addEventListener("click", load);
 monthsSelect.addEventListener("change", load);
 
 load();
+loadNews();
