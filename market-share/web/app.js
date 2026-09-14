@@ -125,12 +125,18 @@ function renderTable(rows) {
 function renderChart(rows) {
   const ctx = document.getElementById("chart");
   const labels = rows.map((r) => formatMonth(r.month));
-  const values = rows.map((r) => r.marketSharePct);
+  const shareValues = rows.map((r) => r.marketSharePct);
+  const cvrValues = rows.map((r) => r.newCvr);
+  const onboardedValues = rows.map((r) => r.onboarded);
   const sources = rows.map((r) => r.source);
 
-  const pointColors = sources.map((s) =>
-    s === "estimate" ? "#a9781e" : s === "actual" ? "#0f2a4c" : "#9aa3ab"
-  );
+  const pointColorsFor = (baseColor) =>
+    sources.map((s) => (s === "estimate" ? "#a9781e" : s === "actual" ? baseColor : "#9aa3ab"));
+
+  const sourceDash = (segCtx) => (sources[segCtx.p1DataIndex] === "estimate" ? [6, 4] : undefined);
+
+  const shareColors = pointColorsFor("#0f2a4c");
+  const cvrColors = pointColorsFor("#5b7fa6");
 
   const config = {
     type: "line",
@@ -139,34 +145,72 @@ function renderChart(rows) {
       datasets: [
         {
           label: "Markedsandel %",
-          data: values,
+          data: shareValues,
+          yAxisID: "y",
           borderColor: "#0f2a4c",
           backgroundColor: "rgba(15, 42, 76, 0.08)",
           spanGaps: true,
           tension: 0.25,
           pointRadius: 4,
-          pointBackgroundColor: pointColors,
-          pointBorderColor: pointColors,
-          segment: {
-            borderDash: (segCtx) => (sources[segCtx.p1DataIndex] === "estimate" ? [6, 4] : undefined),
-          },
+          pointBackgroundColor: shareColors,
+          pointBorderColor: shareColors,
+          segment: { borderDash: sourceDash },
+        },
+        {
+          label: "Nye CVR-numre",
+          data: cvrValues,
+          yAxisID: "y1",
+          borderColor: "#5b7fa6",
+          backgroundColor: "transparent",
+          spanGaps: true,
+          tension: 0.25,
+          pointRadius: 3,
+          pointBackgroundColor: cvrColors,
+          pointBorderColor: cvrColors,
+          segment: { borderDash: sourceDash },
+        },
+        {
+          label: "Nye bankkunder",
+          data: onboardedValues,
+          yAxisID: "y1",
+          borderColor: "#a9781e",
+          backgroundColor: "transparent",
+          spanGaps: true,
+          tension: 0.25,
+          pointRadius: 3,
+          pointBackgroundColor: "#a9781e",
+          pointBorderColor: "#a9781e",
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
       plugins: {
-        legend: { display: false },
+        legend: { display: true, position: "top", labels: { boxWidth: 12, usePointStyle: true } },
         tooltip: {
           callbacks: {
-            afterLabel: (item) => SOURCE_LABEL[sources[item.dataIndex]] ?? "",
+            label: (item) =>
+              item.dataset.label === "Markedsandel %"
+                ? `${item.dataset.label}: ${formatPct(item.raw)}`
+                : `${item.dataset.label}: ${formatNumber(item.raw)}`,
+            afterLabel: (item) =>
+              item.datasetIndex <= 1 ? SOURCE_LABEL[sources[item.dataIndex]] ?? "" : "",
           },
         },
       },
       scales: {
         y: {
+          position: "left",
+          title: { display: true, text: "Markedsandel" },
           ticks: { callback: (v) => `${v}%` },
+        },
+        y1: {
+          position: "right",
+          title: { display: true, text: "Antal" },
+          grid: { drawOnChartArea: false },
+          ticks: { callback: (v) => v.toLocaleString("da-DK") },
         },
       },
     },
@@ -174,6 +218,7 @@ function renderChart(rows) {
 
   if (chart) {
     chart.data = config.data;
+    chart.options = config.options;
     chart.update();
   } else {
     chart = new Chart(ctx, config);
