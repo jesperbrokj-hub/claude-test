@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { marketShareRouter } from "./routes/marketShare";
 import { onboardingRouter } from "./routes/onboarding";
+import { newsRouter } from "./routes/news";
 
 dotenv.config();
 
@@ -19,8 +20,9 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/market-share", marketShareRouter);
 app.use("/api/onboarding", onboardingRouter);
+app.use("/api/news", newsRouter);
 
-app.use(express.static(path.join(__dirname, "..", "..", "web")));
+app.use(express.static(path.join(__dirname, "..", "web")));
 
 app.listen(PORT, () => {
   console.log(`Market-share API running on port ${PORT}`);

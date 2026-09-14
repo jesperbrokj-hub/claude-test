@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Markedsandel-dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="masthead-text">
+        <p class="eyebrow">Danske Bank · Internt værktøj</p>
+        <h1>Markedsandel-dashboard</h1>
+        <p class="subtitle">
+          Markedsandel (%) = Nye bankkunder onboardet med CVR-nummer &lt; 1 måned gammel /
+          Nye CVR-numre stiftet i samme periode.
+          Nævneren hentes automatisk fra Danmarks Statistiks StatBank (<span class="formula">api.statbank.dk</span>);
+          tælleren indtastes manuelt nedenfor.
+        </p>
+      </div>
+      <img class="masthead-photo" src="image-1789143852365.webp" alt="Klavs" />
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="panel">
+      <div class="controls">
+        <label for="months">Vis</label>
+        <select id="months">
+          <option value="6">Seneste 6 måneder</option>
+          <option value="12" selected>Seneste 12 måneder</option>
+          <option value="24">Seneste 24 måneder</option>
+          <option value="36">Seneste 36 måneder</option>
+        </select>
+        <button id="refresh">Opdater</button>
+        <span class="status" id="status"></span>
+      </div>
+
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+      <p class="legend-note">
+        <span class="legend-dot legend-dot--actual"></span>Massiv linje/prik = faktisk tal (KONKEUM), for Markedsandel og Nye CVR-numre.
+        <span class="legend-dot legend-dot--estimate"></span>Stiplet/hul prik = estimat for 2026+ (skaleret via NYRVI2-indekset).
+      </p>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Måned</th>
+            <th class="num">Nye CVR-numre</th>
+            <th>Kilde</th>
+            <th class="num">Nye bankkunder</th>
+            <th class="num">Markedsandel</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Nyheder om nye CVR-numre</h2>
+        <span class="status" id="news-status"></span>
+      </div>
+      <p class="panel-note">
+        Bedste-forsøg søgning i danske medier (Google News) på tværs af flere søgninger, ikke en kurateret liste — dubletter eller irrelevante artikler kan forekomme.
+      </p>
+      <div class="official-sources">
+        <span class="official-sources-label">Officielle kilder:</span>
+        <a href="https://www.statistikbanken.dk/KONKEUM" target="_blank" rel="noopener noreferrer">StatBank: KONKEUM (rå tal)</a>
+        <a href="https://www.statistikbanken.dk/NYRVI2" target="_blank" rel="noopener noreferrer">StatBank: NYRVI2 (indeks)</a>
+      </div>
+      <ul class="news-list" id="news-list"></ul>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
